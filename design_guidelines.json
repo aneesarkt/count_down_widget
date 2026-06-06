@@ -1,0 +1,87 @@
+{
+  "theme": "Dark",
+  "archetype": "Archetype 5 (Luxury) - Modified for Sleek Precision",
+  "design_philosophy": "A high-end, premium countdown experience that treats retirement as a highly anticipated, luxurious milestone. Borrows precision from mechanical watches and tactical aesthetics. Avoids all generic purple/blue tech gradients in favor of deep obsidian, textures, and warm copper/amber accents.",
+  "colors": {
+    "background": "#050505",
+    "surface": "#121212",
+    "surface_glass": "rgba(255, 255, 255, 0.03)",
+    "border": "rgba(255, 255, 255, 0.08)",
+    "text_primary": "#FFFFFF",
+    "text_secondary": "#A3A3A3",
+    "text_muted": "#525252",
+    "accent_primary": "#D97736",
+    "accent_hover": "#E68A4F"
+  },
+  "typography": {
+    "heading_font": "Outfit",
+    "mono_font": "JetBrains Mono",
+    "body_font": "Outfit",
+    "hierarchy": {
+      "h1": "text-5xl md:text-7xl font-light tracking-tighter",
+      "h3": "text-xs md:text-sm uppercase tracking-[0.2em] font-medium text-[#A3A3A3]",
+      "data_large": "text-8xl md:text-[12vw] font-mono font-light tracking-tighter text-white leading-none",
+      "data_medium": "text-3xl md:text-5xl font-mono font-light text-white"
+    }
+  },
+  "layout_and_spacing": {
+    "strategy": "Centralized Focal Point with Generous Margins. The shift count is the undisputed hero, flanked by precise, tactile controls.",
+    "container": "min-h-screen w-full flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden bg-[#050505]",
+    "bento_grid": "Not required; single column stacked widget with generous gaps (gap-12 to gap-24)."
+  },
+  "surfaces_and_materials": {
+    "background_treatment": "Use the provided textured image with extreme low opacity (10-15%) fixed over the #050505 background. Apply a radial gradient mask over it so the edges fall off entirely to pure black, leaving only a subtle spotlight of texture in the center.",
+    "controls_glass": "Crystal Glassmorphism for +/- buttons: bg-white/5 backdrop-blur-xl border border-white/10 shadow-[0_4px_24px_rgba(0,0,0,0.5)] rounded-full hover:bg-white/10 transition-all text-white",
+    "cards": "Flat solid surfaces for the countdown segments: bg-[#121212] border border-white/5 rounded-2xl p-4 md:p-6 flex flex-col items-center justify-center"
+  },
+  "components": {
+    "shift_counter": {
+      "type": "Custom HTML/Tailwind + Framer Motion",
+      "description": "Massive JetBrains Mono numerals (Starts at 1025). The '-' button is on the left, '+' on the right, vertically centered with the number. Below the number, center a subtle 'Quick Edit' icon button.",
+      "interactions": "Hovering buttons slightly increases brightness. Clicking triggers a haptic-like scale-down (0.95)."
+    },
+    "quick_edit_modal": {
+      "type": "Shadcn Dialog",
+      "description": "A sleek, minimal dark modal to type the exact shift number. Uses Shadcn Input with pure dark styling (bg-[#121212] border-white/10 text-white focus:ring-[#D97736])."
+    },
+    "live_countdown": {
+      "type": "Custom Grid",
+      "description": "A grid row showing Y, M, D, H, M, S. Each block should have the number in JetBrains Mono and the label (YEARS, MONTHS) in ultra-small uppercase tracking-widest text. Layout: grid-cols-3 md:grid-cols-6 gap-4."
+    }
+  },
+  "icons": {
+    "library": "iconoir-react",
+    "installation": "yarn add iconoir-react",
+    "usage": "Use EditPencil for quick edit, Plus and Minus for the shift controls."
+  },
+  "motion": {
+    "library": "framer-motion",
+    "rules": [
+      "Animate the changing digits using AnimatePresence if possible, or simple state transitions.",
+      "The +/- buttons must have a spring-based tap animation (whileTap={{ scale: 0.9 }}).",
+      "The background and layout must remain completely static to avoid visual noise."
+    ]
+  },
+  "image_urls": {
+    "background_texture": {
+      "url": "https://images.unsplash.com/photo-1578662996442-48f60103fc96?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMzl8MHwxfHNlYXJjaHwxfHxibGFjayUyMHRleHR1cmVkJTIwc3VyZmFjZXxlbnwwfHx8YmxhY2t8MTc4MDc2MDU2Mnww&ixlib=rb-4.1.0&q=85",
+      "description": "Dark textured surface. Use as an absolute fixed background covering the screen (z-0), with opacity-10, and a radial gradient overlay to fade it into the black background at the edges.",
+      "category": "background"
+    }
+  },
+  "accessibility": {
+    "contrast": "Ensure all text meets at least 4.5:1. Copper/Amber accent on black easily passes. Muted gray text must be light enough.",
+    "testing": "MUST include data-testid on +, -, edit buttons, the shift display, and the modal input (e.g., data-testid='minus-button', data-testid='shift-display')."
+  },
+  "instructions_to_main_agent": [
+    "1. Initialize the app with Tailwind CSS, framer-motion, and iconoir-react.",
+    "2. Set the global background to #050505 and use the provided texture image as a subtle background layer.",
+    "3. Use JetBrains Mono for all numeric data and Outfit for standard text/labels.",
+    "4. Build the massive central Shift widget starting at 1025. Store it in React state and sync to localStorage.",
+    "5. Implement precise +/- buttons to increment/decrement the shift state with Framer Motion tap effects.",
+    "6. Add a Quick Edit button (using the EditPencil icon) that opens a Shadcn Dialog. The dialog should contain a clean dark-themed input to manually set the exact shift count.",
+    "7. Implement a live countdown timer ticking down to 4 years, 10 months, 25 days from the moment of load (calculate a target Date and run a setInterval every second).",
+    "8. Display the countdown in 6 segments (Years, Months, Days, Hours, Minutes, Seconds) using the 'cards' style defined in the guidelines.",
+    "9. Ensure every interactive element has a clear data-testid attribute for testing."
+  ]
+}
