@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Metadata for the home-screen widget.
+  - updatePeriodMillis: 1800000 (30 min) — Android enforces a 30-min minimum.
+  - resizeMode: horizontal|vertical
+  - widgetCategory: home_screen (required so it appears in the picker)
+  - initialLayout: the same layout the provider inflates
+  - previewImage: optional; pick a drawable or omit
+-->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="110dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/countdown_widget_layout"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen"
+    android:configure=""
+    android:description="@string/widget_description" />

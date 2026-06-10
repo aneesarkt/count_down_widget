@@ -1,0 +1,8 @@
+<!--
+  Add these two strings to:
+    android/app/src/main/res/values/strings.xml
+
+  Inside the existing <resources> root.
+-->
+<string name="widget_label">Shifts Until Retirement</string>
+<string name="widget_description">A countdown to your retirement, right on your home screen.</string>
