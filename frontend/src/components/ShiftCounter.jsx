@@ -3,6 +3,57 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Minus, EditPencil } from "iconoir-react";
 import QuickEditDialog from "@/components/QuickEditDialog";
 
+// Stable animation configs — defined at module scope to avoid new object
+// references on every render.
+const BUTTON_TAP = { scale: 0.9 };
+const BUTTON_HOVER = { scale: 1.04 };
+const BUTTON_SPRING = { type: "spring", stiffness: 400, damping: 20 };
+
+const NUM_INITIAL = { y: 12, opacity: 0 };
+const NUM_ANIMATE = { y: 0, opacity: 1 };
+const NUM_EXIT = { y: -12, opacity: 0 };
+const NUM_TRANSITION = { duration: 0.18, ease: "easeOut" };
+
+function StepButton({ direction, disabled, onClick }) {
+  const isMinus = direction === "minus";
+  const Icon = isMinus ? Minus : Plus;
+  return (
+    <motion.button
+      type="button"
+      data-testid={isMinus ? "minus-button" : "plus-button"}
+      aria-label={isMinus ? "Decrement shift" : "Increment shift"}
+      disabled={disabled}
+      onClick={onClick}
+      whileTap={BUTTON_TAP}
+      whileHover={BUTTON_HOVER}
+      transition={BUTTON_SPRING}
+      className="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white shadow-[0_4px_24px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30 md:h-16 md:w-16"
+    >
+      <Icon className="h-5 w-5" strokeWidth={2} />
+    </motion.button>
+  );
+}
+
+function ShiftNumber({ shifts }) {
+  return (
+    <div className="relative flex flex-col items-center">
+      <AnimatePresence mode="popLayout">
+        <motion.span
+          key={shifts}
+          initial={NUM_INITIAL}
+          animate={NUM_ANIMATE}
+          exit={NUM_EXIT}
+          transition={NUM_TRANSITION}
+          className="font-mono-num text-7xl font-light leading-none tracking-tighter text-white md:text-[9rem]"
+          data-testid="shift-display"
+        >
+          {shifts}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function ShiftCounter({ shifts, onChange, disabled }) {
   const [editOpen, setEditOpen] = useState(false);
 
@@ -19,49 +70,17 @@ export default function ShiftCounter({ shifts, onChange, disabled }) {
       </span>
 
       <div className="flex w-full items-center justify-center gap-6 md:gap-12">
-        <motion.button
-          type="button"
-          data-testid="minus-button"
-          aria-label="Decrement shift"
+        <StepButton
+          direction="minus"
           disabled={!canDecrement}
           onClick={() => onChange(shifts - 1)}
-          whileTap={{ scale: 0.9 }}
-          whileHover={{ scale: 1.04 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          className="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white shadow-[0_4px_24px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30 md:h-16 md:w-16"
-        >
-          <Minus className="h-5 w-5" strokeWidth={2} />
-        </motion.button>
-
-        <div className="relative flex flex-col items-center">
-          <AnimatePresence mode="popLayout">
-            <motion.span
-              key={shifts}
-              initial={{ y: 12, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -12, opacity: 0 }}
-              transition={{ duration: 0.18, ease: "easeOut" }}
-              className="font-mono-num text-7xl font-light leading-none tracking-tighter text-white md:text-[9rem]"
-              data-testid="shift-display"
-            >
-              {shifts}
-            </motion.span>
-          </AnimatePresence>
-        </div>
-
-        <motion.button
-          type="button"
-          data-testid="plus-button"
-          aria-label="Increment shift"
+        />
+        <ShiftNumber shifts={shifts} />
+        <StepButton
+          direction="plus"
           disabled={!canIncrement}
           onClick={() => onChange(shifts + 1)}
-          whileTap={{ scale: 0.9 }}
-          whileHover={{ scale: 1.04 }}
-          transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          className="flex h-14 w-14 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white shadow-[0_4px_24px_rgba(0,0,0,0.5)] backdrop-blur-xl transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-30 md:h-16 md:w-16"
-        >
-          <Plus className="h-5 w-5" strokeWidth={2} />
-        </motion.button>
+        />
       </div>
 
       <button

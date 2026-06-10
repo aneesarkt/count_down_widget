@@ -1,5 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 
+const SEGMENT_KEYS = [
+  "years",
+  "months",
+  "days",
+  "hours",
+  "minutes",
+  "seconds",
+];
+
+const SEGMENT_DEFS = [
+  { key: "years", label: "Years", testid: "countdown-years" },
+  { key: "months", label: "Months", testid: "countdown-months" },
+  { key: "days", label: "Days", testid: "countdown-days" },
+  { key: "hours", label: "Hours", testid: "countdown-hours" },
+  { key: "minutes", label: "Minutes", testid: "countdown-minutes" },
+  { key: "seconds", label: "Seconds", testid: "countdown-seconds" },
+];
+
 function computeDiff(target) {
   const now = new Date();
   let years = target.getFullYear() - now.getFullYear();
@@ -47,28 +65,36 @@ function computeDiff(target) {
 
 const pad = (n, w = 2) => String(n).padStart(w, "0");
 
-const Segment = ({ value, label, testid, width = 2 }) => (
-  <div
-    data-testid={testid}
-    className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-[#0c0c0c] px-2 py-5 md:py-6"
-  >
-    <span className="font-mono-num text-3xl font-light leading-none tracking-tighter text-white md:text-5xl">
-      {pad(value, width)}
-    </span>
-    <span className="mt-3 text-[9px] uppercase tracking-[0.25em] text-neutral-500 md:text-[10px]">
-      {label}
-    </span>
-  </div>
-);
-
-export default function LiveCountdown({ targetDate }) {
-  const target = useMemo(
-    () => (targetDate ? new Date(targetDate) : null),
-    [targetDate],
+function Segment({ value, label, testid }) {
+  return (
+    <div
+      data-testid={testid}
+      className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-[#0c0c0c] px-2 py-5 md:py-6"
+    >
+      <span className="font-mono-num text-3xl font-light leading-none tracking-tighter text-white md:text-5xl">
+        {pad(value)}
+      </span>
+      <span className="mt-3 text-[9px] uppercase tracking-[0.25em] text-neutral-500 md:text-[10px]">
+        {label}
+      </span>
+    </div>
   );
+}
 
-  // Tick counter to trigger re-render every second. setState lives only inside
-  // the interval callback (event-like), not synchronously in the effect body.
+function CountdownSkeleton() {
+  return (
+    <div className="grid grid-cols-3 gap-3 md:grid-cols-6 md:gap-4">
+      {SEGMENT_KEYS.map((k) => (
+        <div
+          key={k}
+          className="h-24 animate-pulse rounded-2xl border border-white/5 bg-[#0c0c0c]"
+        />
+      ))}
+    </div>
+  );
+}
+
+function useCountdown(target) {
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
@@ -77,46 +103,35 @@ export default function LiveCountdown({ targetDate }) {
     return () => clearInterval(id);
   }, [target]);
 
-  // Derive diff each render; depends on target + tick.
-  const diff = useMemo(() => {
-    if (!target) return null;
-    // tick is referenced to force recompute every interval
+  return useMemo(() => {
+    // tick is part of deps to force recompute on each interval
     void tick;
-    return computeDiff(target);
+    return target ? computeDiff(target) : null;
   }, [target, tick]);
+}
 
-  if (!diff) {
-    return (
-      <div className="grid grid-cols-3 gap-3 md:grid-cols-6 md:gap-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="h-24 animate-pulse rounded-2xl border border-white/5 bg-[#0c0c0c]"
-          />
-        ))}
-      </div>
-    );
-  }
+export default function LiveCountdown({ targetDate }) {
+  const target = useMemo(
+    () => (targetDate ? new Date(targetDate) : null),
+    [targetDate],
+  );
+  const diff = useCountdown(target);
+
+  if (!diff) return <CountdownSkeleton />;
 
   return (
     <div
       data-testid="live-countdown"
       className="grid grid-cols-3 gap-3 md:grid-cols-6 md:gap-4"
     >
-      <Segment value={diff.years} label="Years" testid="countdown-years" />
-      <Segment value={diff.months} label="Months" testid="countdown-months" />
-      <Segment value={diff.days} label="Days" testid="countdown-days" />
-      <Segment value={diff.hours} label="Hours" testid="countdown-hours" />
-      <Segment
-        value={diff.minutes}
-        label="Minutes"
-        testid="countdown-minutes"
-      />
-      <Segment
-        value={diff.seconds}
-        label="Seconds"
-        testid="countdown-seconds"
-      />
+      {SEGMENT_DEFS.map((s) => (
+        <Segment
+          key={s.key}
+          value={diff[s.key]}
+          label={s.label}
+          testid={s.testid}
+        />
+      ))}
     </div>
   );
 }

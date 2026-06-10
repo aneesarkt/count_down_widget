@@ -10,18 +10,52 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+function validateShiftValue(raw) {
+  const n = parseInt(raw, 10);
+  if (Number.isNaN(n) || n < 0) {
+    return {
+      ok: false,
+      error: "Please enter a whole number (0 or greater)",
+    };
+  }
+  return { ok: true, value: n };
+}
+
+function FormActions({ onCancel }) {
+  return (
+    <DialogFooter className="gap-2 pt-2 sm:gap-2">
+      <Button
+        type="button"
+        variant="ghost"
+        data-testid="quick-edit-cancel"
+        onClick={onCancel}
+        className="text-neutral-400 hover:bg-white/5 hover:text-white"
+      >
+        Cancel
+      </Button>
+      <Button
+        type="submit"
+        data-testid="quick-edit-submit"
+        className="bg-[#D97736] text-black hover:bg-[#E68A4F]"
+      >
+        Save
+      </Button>
+    </DialogFooter>
+  );
+}
+
 function EditForm({ currentValue, onSubmit, onCancel }) {
   const [value, setValue] = useState(String(currentValue ?? 0));
   const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const n = parseInt(value, 10);
-    if (Number.isNaN(n) || n < 0) {
-      setError("Please enter a whole number (0 or greater)");
+    const result = validateShiftValue(value);
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
-    onSubmit(n);
+    onSubmit(result.value);
   };
 
   return (
@@ -41,25 +75,7 @@ function EditForm({ currentValue, onSubmit, onCancel }) {
           {error}
         </p>
       )}
-
-      <DialogFooter className="gap-2 pt-2 sm:gap-2">
-        <Button
-          type="button"
-          variant="ghost"
-          data-testid="quick-edit-cancel"
-          onClick={onCancel}
-          className="text-neutral-400 hover:bg-white/5 hover:text-white"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          data-testid="quick-edit-submit"
-          className="bg-[#D97736] text-black hover:bg-[#E68A4F]"
-        >
-          Save
-        </Button>
-      </DialogFooter>
+      <FormActions onCancel={onCancel} />
     </form>
   );
 }
