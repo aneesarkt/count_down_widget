@@ -1,63 +1,88 @@
-# Native Android Home-Screen Widget — Drop-in Files
+# Native Android Home-Screen Widget — Java Drop-in for Capacitor
 
-These files add a real native Android home-screen widget to your Capacitor app.
-Emergent cannot edit your `android/` project directly (it lives on your machine),
-so copy each file to the path listed below inside your local Capacitor project,
+Package: `com.anees.countdownwidget`
+Capacitor project: Java-based (`MainActivity extends BridgeActivity`)
+
+These files add a real native Android home-screen widget to your local
+Capacitor Android Studio project. Emergent cannot edit your `android/` folder
+directly (your APK lives on your machine), so copy each file to the path below,
 then build the APK in Android Studio.
-
-> ⚠️ **Replace `com.yourapp.package`** in every file with your real package name
-> (the one in `capacitor.config.ts` / `applicationId` in `android/app/build.gradle`).
-> Example: `com.example.retirementwidget`.
 
 ---
 
-## Files & their destinations
+## File map
 
 | File in this folder | Copy to (inside your Capacitor `android/` project) |
 | --- | --- |
-| `CountdownWidgetProvider.kt` | `android/app/src/main/java/<your/package/path>/CountdownWidgetProvider.kt` |
+| `CountdownWidgetProvider.java` | `android/app/src/main/java/com/anees/countdownwidget/CountdownWidgetProvider.java` |
+| `MainActivity.java` | `android/app/src/main/java/com/anees/countdownwidget/MainActivity.java` (replaces your current 3-line MainActivity) |
 | `res/xml/countdown_widget_info.xml` | `android/app/src/main/res/xml/countdown_widget_info.xml` |
 | `res/layout/countdown_widget_layout.xml` | `android/app/src/main/res/layout/countdown_widget_layout.xml` |
 | `res/drawable/widget_background.xml` | `android/app/src/main/res/drawable/widget_background.xml` |
 | `AndroidManifest.snippet.xml` | Merge the `<receiver>` block into `android/app/src/main/AndroidManifest.xml` (inside `<application>`) |
-| `MainActivity.patch.kt` | Apply the two-line patch to your `MainActivity.kt` (`onCreate` and `onResume`) |
+| `strings.snippet.xml` | Merge the two `<string>` entries into `android/app/src/main/res/values/strings.xml` (inside `<resources>`) |
 
-If you don't have an `xml/` or `drawable/` folder under `res/`, just create them.
+If the `xml/` or `drawable/` folders don't exist under `res/`, create them.
 
 ---
 
-## Step-by-step
+## Step-by-step (Java, Capacitor)
 
-### 1. Create the package folder
-In Android Studio, open `android/app/src/main/java/` and locate your package
-folder (e.g. `com/example/retirementwidget`). Drop
-`CountdownWidgetProvider.kt` there and update its `package` line to match.
+### 1. Drop in the Java files
+- Copy `CountdownWidgetProvider.java` into
+  `android/app/src/main/java/com/anees/countdownwidget/`.
+- Replace `android/app/src/main/java/com/anees/countdownwidget/MainActivity.java`
+  with the version in this folder. It keeps `extends BridgeActivity` and adds
+  an `onResume()` that refreshes the widget.
 
-### 2. Add resource files
+### 2. Add the resource files
 Copy:
 - `res/xml/countdown_widget_info.xml`
 - `res/layout/countdown_widget_layout.xml`
 - `res/drawable/widget_background.xml`
 
-into the corresponding folders under `android/app/src/main/res/`.
+into the matching folders under `android/app/src/main/res/`.
 
-### 3. Register the widget in `AndroidManifest.xml`
+### 3. Register the receiver in `AndroidManifest.xml`
 Open `android/app/src/main/AndroidManifest.xml` and, **inside** the
 `<application>` tag, paste the `<receiver>` block from
-`AndroidManifest.snippet.xml`. It must sit alongside your existing
-`<activity>` entry, not inside it.
+`AndroidManifest.snippet.xml`. Put it next to your existing `<activity>` entry.
 
-### 4. Refresh the widget when the app opens
-Open `android/app/src/main/java/<your/package>/MainActivity.kt` and apply the
-patch shown in `MainActivity.patch.kt`. It sends an
-`ACTION_APPWIDGET_UPDATE` broadcast so the widget refreshes whenever the app is
-opened or resumed.
+### 4. Add the strings
+Open `android/app/src/main/res/values/strings.xml` and, **inside** the
+`<resources>` root, paste the two `<string>` lines from `strings.snippet.xml`.
 
-### 5. (Optional) Share the target date from the web app
-The widget will use a default target (4 years 10 months 25 days from first
-launch), stored in `SharedPreferences`. If you also want the web/React side to
-write the target, install the Capacitor Preferences plugin and write the key
-`countdown_target_iso` with an ISO-8601 string:
+### 5. Sync Capacitor (only if you changed anything in `frontend/`)
+```bash
+npx cap sync android
+```
+(You can skip this if you only added the native files above.)
+
+### 6. Build & install
+In Android Studio: **Build → Build Bundle(s) / APK(s) → Build APK(s)** → install
+on your Samsung device → long-press home → **Widgets** → scroll to "Shifts
+Until Retirement" → drag onto the home screen.
+
+---
+
+## Behavior
+
+- Title: `SHIFTS UNTIL RETIREMENT`
+- Big number: **days** remaining
+- Smaller: `HH:MM` hours/minutes remaining
+- Tapping the widget opens the Capacitor app via the launch intent for
+  `com.anees.countdownwidget`.
+- The widget auto-refreshes every **30 minutes** (`updatePeriodMillis=1800000`).
+- `MainActivity.onResume()` broadcasts `ACTION_APPWIDGET_UPDATE` so the widget
+  refreshes the moment the app is opened or returned to.
+
+---
+
+## (Optional) Driving the target date from the web/React side
+
+The widget reads `SharedPreferences("CapacitorStorage")["countdown_target_iso"]`.
+Capacitor's official Preferences plugin writes to that exact SharedPreferences
+file, so you can control the target from the React app:
 
 ```bash
 yarn add @capacitor/preferences
@@ -72,22 +97,21 @@ await Preferences.set({
 });
 ```
 
-Capacitor Preferences uses the SharedPreferences file named `CapacitorStorage`,
-which is exactly what the widget reads from. After writing, call your existing
-"refresh widget" flow (or just close and reopen the app — step 4 triggers a
-refresh on resume).
-
-### 6. Build & install
-In Android Studio: **Build → Build Bundle(s) / APK(s) → Build APK(s)**, install
-on your Samsung device, then long-press home → **Widgets** → scroll to your
-app. You'll see "Shifts Until Retirement". Drag it onto the home screen.
+The widget falls back to a stored 4y 10m 25d default if the key is missing.
 
 ---
 
-## What the widget shows
-- Title: **SHIFTS UNTIL RETIREMENT**
-- Big number: **days** remaining
-- Smaller: **HH:MM** hours/minutes remaining
-- Tapping the widget opens the Capacitor app
-- Auto-refresh every 30 minutes (Android's minimum allowed period) + every
-  time the app opens.
+## Troubleshooting
+
+- **Widget doesn't appear in the picker** → the `<receiver>` wasn't added to
+  `AndroidManifest.xml`, or `widgetCategory="home_screen"` is missing in
+  `countdown_widget_info.xml`. Both are correct in this drop, so double-check
+  the manifest merge.
+- **App crashes opening widget picker** → check Logcat for an
+  `InflateException`; usually means `widget_background.xml` wasn't copied to
+  `res/drawable/`.
+- **Tap doesn't open the app** → make sure your `applicationId` in
+  `android/app/build.gradle` is `com.anees.countdownwidget` (it should be — it
+  matches the `package` line in the Java files).
+- **`Locale` / `String.format` import error** → unlikely; both are
+  `java.util.Locale` and `java.lang.String` which are imported / built in.

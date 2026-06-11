@@ -2,10 +2,11 @@
   Merge this <receiver> block INSIDE the <application> tag of:
     android/app/src/main/AndroidManifest.xml
 
-  Place it next to your existing <activity android:name=".MainActivity" .../>,
-  NOT inside it. Leave your existing entries untouched.
+  Place it next to your existing <activity android:name=".MainActivity" .../>
+  entry (NOT inside it). Do not remove or modify any existing entries.
 
-  Also add the string resource (next file).
+  The receiver's fully-qualified class name resolves to:
+    com.anees.countdownwidget.CountdownWidgetProvider
 -->
 <receiver
     android:name=".CountdownWidgetProvider"

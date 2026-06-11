@@ -2,7 +2,8 @@
   Add these two strings to:
     android/app/src/main/res/values/strings.xml
 
-  Inside the existing <resources> root.
+  Place them inside the existing <resources> root, alongside the strings
+  Capacitor already generated.
 -->
 <string name="widget_label">Shifts Until Retirement</string>
 <string name="widget_description">A countdown to your retirement, right on your home screen.</string>
